@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Face Recognition</title>
+</head>
+<body>
+  <h1>Face Recognition</h1>
+
+  <form id="face-recognition-form">
+    <label for="image-path">Image Path:</label>
+    <input type="text" id="image-path" required>
+    <br>
+    <label for="test-mode">Test Mode (Unknown Face):</label>
+    <input type="checkbox" id="test-mode">
+    <br>
+    <button type="button" onclick="run_face_recognition()">Run</button>
+  </form>
+
+  <div id="results"></div>
+
+  <script>
+    async function run_face_recognition() {
+      // Get user input
+      const image_path = document.getElementById("image-path").value;
+      const test_mode = document.getElementById("test-mode").checked;
+
+      // Send data to Flask route with fetch
+      const response = await fetch('/recognize', {
+        method: 'POST',
+        body: JSON.stringify({
+          image_path: image_path,
+          test_mode: test_mode
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await response.json();
+
+      // Update results div
+      document.getElementById("results").innerText = data.results;
+
+      // Display image (if provided by Flask)
+      if (data.encoded_image) {
+        const img = document.createElement('img');
+        img.src = `data:image/png;base64,${data.encoded_image}`;
+        document.getElementById("results").appendChild(img);
+      }
+    }
+  </script>
+</body>
+</html>
